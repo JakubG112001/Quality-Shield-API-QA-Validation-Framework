@@ -1,0 +1,22 @@
+# Newman reports
+newman/
+
+# Node modules (if Newman is installed locally)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp

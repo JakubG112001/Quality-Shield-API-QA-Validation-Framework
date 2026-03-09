@@ -1,0 +1,242 @@
+{
+  "info": {
+    "name": "Restful-Booker API - Negative Tests",
+    "description": "Tests that validate error handling and edge cases",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Invalid Authentication - Wrong Password",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Returns 200 with reason for bad credentials', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response indicates authentication failed', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('reason');",
+              "    pm.expect(jsonData.reason).to.eql('Bad credentials');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"wrongpassword123\"\n}"
+        },
+        "url": {
+          "raw": "https://restful-booker.herokuapp.com/auth",
+          "protocol": "https",
+          "host": ["restful-booker", "herokuapp", "com"],
+          "path": ["auth"]
+        }
+      }
+    },
+    {
+      "name": "Create Booking - Missing Required Fields",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Server handles missing fields', function () {",
+              "    // API returns 500 for missing fields (poor error handling)",
+              "    pm.response.to.have.status(500);",
+              "});",
+              "",
+              "pm.test('Demonstrates lack of input validation', function () {",
+              "    // This test shows the API has poor validation",
+              "    // Should return 400 Bad Request, but returns 500 Internal Server Error",
+              "    console.log('API lacks proper validation - returns 500 instead of 400');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"firstname\": \"John\"\n}"
+        },
+        "url": {
+          "raw": "https://restful-booker.herokuapp.com/booking",
+          "protocol": "https",
+          "host": ["restful-booker", "herokuapp", "com"],
+          "path": ["booking"]
+        }
+      }
+    },
+    {
+      "name": "Get Non-Existent Booking",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Returns 404 for non-existent booking', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test('Error handling is appropriate', function () {",
+              "    // Correctly returns 404 Not Found",
+              "    console.log('Good: API properly returns 404 for missing resource');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://restful-booker.herokuapp.com/booking/999999999",
+          "protocol": "https",
+          "host": ["restful-booker", "herokuapp", "com"],
+          "path": ["booking", "999999999"]
+        }
+      }
+    },
+    {
+      "name": "Update Booking - No Authentication",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Rejects update without authentication', function () {",
+              "    pm.response.to.have.status(403);",
+              "});",
+              "",
+              "pm.test('Security validation works correctly', function () {",
+              "    // Good: API requires authentication for updates",
+              "    console.log('Good: API enforces authentication for sensitive operations');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"firstname\": \"Hacker\",\n    \"lastname\": \"McHackface\",\n    \"totalprice\": 1,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n        \"checkin\": \"2024-01-01\",\n        \"checkout\": \"2024-01-05\"\n    }\n}"
+        },
+        "url": {
+          "raw": "https://restful-booker.herokuapp.com/booking/1",
+          "protocol": "https",
+          "host": ["restful-booker", "herokuapp", "com"],
+          "path": ["booking", "1"]
+        }
+      }
+    },
+    {
+      "name": "Create Booking - Invalid Data Types",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('API accepts invalid data types', function () {",
+              "    // This will likely return 200 - showing weak validation",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Demonstrates weak type validation', function () {",
+              "    var jsonData = pm.response.json();",
+              "    // API accepts string for price instead of number",
+              "    console.log('Issue found: API accepts string for numeric field');",
+              "    console.log('Total price stored as:', jsonData.booking.totalprice);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"firstname\": \"Test\",\n    \"lastname\": \"User\",\n    \"totalprice\": \"not a number\",\n    \"depositpaid\": \"yes\",\n    \"bookingdates\": {\n        \"checkin\": \"2024-01-01\",\n        \"checkout\": \"2024-01-05\"\n    }\n}"
+        },
+        "url": {
+          "raw": "https://restful-booker.herokuapp.com/booking",
+          "protocol": "https",
+          "host": ["restful-booker", "herokuapp", "com"],
+          "path": ["booking"]
+        }
+      }
+    },
+    {
+      "name": "SQL Injection Attempt in Firstname",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('API handles potential SQL injection', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Checks if SQL injection is sanitized', function () {",
+              "    var jsonData = pm.response.json();",
+              "    // If this creates a booking, the input is not sanitized properly",
+              "    console.log('Testing SQL injection protection');",
+              "    console.log('Firstname stored as:', jsonData.booking.firstname);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"firstname\": \"'; DROP TABLE bookings; --\",\n    \"lastname\": \"Test\",\n    \"totalprice\": 100,\n    \"depositpaid\": true,\n    \"bookingdates\": {\n        \"checkin\": \"2024-01-01\",\n        \"checkout\": \"2024-01-05\"\n    }\n}"
+        },
+        "url": {
+          "raw": "https://restful-booker.herokuapp.com/booking",
+          "protocol": "https",
+          "host": ["restful-booker", "herokuapp", "com"],
+          "path": ["booking"]
+        }
+      }
+    }
+  ]
+}
